@@ -1,13 +1,13 @@
 import React, { useState } from "react";
-import axios from "axios"; // Import axios for API calls
-import "../css/VerifyPage.css"; // CSS for styling
+import axios from "axios";
+import "../css/VerifyPage.css";
 import { useNavigate } from "react-router-dom";
 import baseURL from "../base_url";
 
 const VerifyPage = () => {
   const [emailOtp, setEmailOtp] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [formData, setFormData] = useState(JSON.parse(localStorage.getItem("formData"))); // Retrieve formData from localStorage
+  const [formData, setFormData] = useState(JSON.parse(localStorage.getItem("formData")));
   const navigate = useNavigate();
 
   const handleEmailVerify = async () => {
@@ -20,22 +20,21 @@ const VerifyPage = () => {
         phone: formData.phone,
         companyName: formData.companyName,
         employeeSize: formData.employeeSize,
-        password: formData.password, // Ensure you have the password
+        password: formData.password,
       });
 
-      // Handle successful registration and token storage
       if (response.data.token) {
-        localStorage.setItem("token", response.data.token); // Store the JWT token
-        localStorage.setItem("companyData", JSON.stringify(formData)); // Save company data in local storage
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("companyData", JSON.stringify(formData));
       }
 
       setProcessing(false);
-      alert(response.data.message); // Show success message
-      navigate('/'); // Redirect to the homepage
+      alert(response.data.message);
+      navigate('/');
     } catch (error) {
       setProcessing(false);
       if (error.response) {
-        alert(error.response.data.message); // Show error message from the server
+        alert(error.response.data.message);
       } else {
         alert('An unexpected error occurred.');
       }

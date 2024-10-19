@@ -2,72 +2,137 @@ import React, { useState } from "react";
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import "../css/JobPost.css"; // CSS styling
-import CancelIcon from '@mui/icons-material/Cancel'; // Import CancelIcon from MUI
+import "../css/JobPost.css";
+import CancelIcon from "@mui/icons-material/Cancel";
+import axios from "axios";
+import baseURL from "../base_url";
 
 const JobPostingPage = () => {
   const [jobTitle, setJobTitle] = useState("");
   const [jobDescription, setJobDescription] = useState("");
   const [experienceLevel, setExperienceLevel] = useState(null);
-  const [candidateEmails, setCandidateEmails] = useState([]); // Array to store multiple emails
-  const [newEmail, setNewEmail] = useState(""); // State for new email input
+  const [candidateEmails, setCandidateEmails] = useState([]);
+  const [newEmail, setNewEmail] = useState("");
   const [endDate, setEndDate] = useState(null);
-  const [isFormVisible, setIsFormVisible] = useState(false); // State for form visibility
+  const [isFormVisible, setIsFormVisible] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const experienceOptions = [
-    { value: "junior", label: "Junior" },
-    { value: "mid", label: "Mid" },
-    { value: "senior", label: "Senior" },
+    { value: "0-2", label: "0 to 2 years" },
+    { value: "2-4", label: "2 to 4 years" },
+    { value: "above-4", label: "Above 4 years" },
   ];
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Job posted successfully!");
-    // Further submission logic here
+    setProcessing(true);
+    setErrors({});
+    const newErrors = {};
+    if (!jobTitle || jobTitle.length < 3 || jobTitle.length > 50) {
+      newErrors.jobTitle = "Job title must be between 3 and 50 characters.";
+    }
+    if (!jobDescription || jobDescription.length < 10 || jobDescription.length > 500) {
+      newErrors.jobDescription = "Job description must be between 10 and 500 characters.";
+    }
+    if (candidateEmails.length === 0) {
+      newErrors.candidateEmails = "At least one candidate email must be added.";
+    } else {
+      candidateEmails.forEach((email, index) => {
+        if (!validateEmail(email)) {
+          newErrors[`email_${index}`] = `Email ${index + 1} is invalid.`;
+        }
+      });
+    }
+    if (!endDate) {
+      newErrors.endDate = "End date must be selected.";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      setProcessing(false);
+      return;
+    }
+
+    const jobData = {
+      title: jobTitle,
+      description: jobDescription,
+      experienceLevel: experienceLevel?.value,
+      endDate: endDate,
+      emailRecipients: candidateEmails,
+    };
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `${baseURL}/api/jobs/createjob`,
+        jobData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      alert("Job posted successfully!");
+      console.log(response.data);
+      setJobTitle("");
+      setJobDescription("");
+      setExperienceLevel(null);
+      setCandidateEmails([]);
+      setNewEmail("");
+      setEndDate(null);
+      setIsFormVisible(false);
+    } catch (error) {
+      console.error("Error posting job:", error);
+      alert("Failed to post job. Please try again.");
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleEmailKeyDown = (e) => {
     if (e.key === "Enter" && newEmail) {
       e.preventDefault();
-      // Add the new email to the list if it's valid
       if (validateEmail(newEmail)) {
         setCandidateEmails((prevEmails) => [...prevEmails, newEmail]);
-        setNewEmail(""); // Clear the input
+        setNewEmail("");
       } else {
-        alert("Please enter a valid email address."); // Optional: Alert for invalid email
+        alert("Please enter a valid email address.");
       }
     }
   };
 
   const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email regex
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   };
 
   const handleEmailDelete = (emailToDelete) => {
-    setCandidateEmails((prevEmails) => prevEmails.filter(email => email !== emailToDelete));
+    setCandidateEmails((prevEmails) =>
+      prevEmails.filter((email) => email !== emailToDelete)
+    );
   };
 
   return (
     <div>
-      {!isFormVisible && <button 
-        style={{ 
-          backgroundColor: '#0096FF', // Blue background
-          color: 'white', // White text
-          padding: '10px 20px', // Padding
-          border: 'none', // No border
-          borderRadius: '5px', // Rounded corners
-          cursor: 'pointer', // Pointer cursor
-          marginBottom: '20px', // Space below the button
-        }} 
-        onClick={() => setIsFormVisible(!isFormVisible)} // Toggle form visibility
-      >
-        Create Interview
-      </button>}
+      {!isFormVisible && (
+        <button
+          style={{
+            backgroundColor: "#0096FF",
+            color: "white",
+            padding: "10px 20px",
+            border: "none",
+            borderRadius: "5px",
+            cursor: "pointer",
+          }}
+          onClick={() => setIsFormVisible(!isFormVisible)}
+        >
+          Create Interview
+        </button>
+      )}
 
-      {isFormVisible && ( // Conditionally render the form
+      {isFormVisible && (
         <div className="form-container">
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} className="jobpostForm">
             <div className="form-group">
               <label>Job Title</label>
               <input
@@ -77,6 +142,7 @@ const JobPostingPage = () => {
                 placeholder="Enter Job Title"
                 required
               />
+              {errors.jobTitle && <span className="error">{errors.jobTitle}</span>}
             </div>
 
             <div className="form-group">
@@ -87,6 +153,7 @@ const JobPostingPage = () => {
                 placeholder="Enter Job Description"
                 required
               />
+              {errors.jobDescription && <span className="error">{errors.jobDescription}</span>}
             </div>
 
             <div className="form-group">
@@ -101,13 +168,30 @@ const JobPostingPage = () => {
 
             <div className="form-group">
               <label>Add Candidates</label>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "10px",
+                  marginBottom: "5px",
+                  fontSize: "12px",
+                }}
+              >
                 {candidateEmails.map((email, index) => (
-                  <div key={index} style={{ display: 'flex', alignItems: 'center', border: '1px solid #ccc', borderRadius: '5px', padding: '5px' }}>
+                  <div
+                    key={index}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      border: "1px solid #ccc",
+                      borderRadius: "5px",
+                      padding: "5px",
+                    }}
+                  >
                     <span>{email}</span>
-                    <CancelIcon 
-                      style={{ cursor: 'pointer', marginLeft: '5px' }} 
-                      onClick={() => handleEmailDelete(email)} // Delete email on click
+                    <CancelIcon
+                      style={{ cursor: "pointer", marginLeft: "5px" }}
+                      onClick={() => handleEmailDelete(email)}
                     />
                   </div>
                 ))}
@@ -115,23 +199,26 @@ const JobPostingPage = () => {
               <input
                 type="text"
                 value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)} // Control input for new email
+                onChange={(e) => setNewEmail(e.target.value)}
                 onKeyDown={handleEmailKeyDown}
                 placeholder="Enter candidate emails (press Enter to add)"
               />
+              {errors.candidateEmails && <span className="error">{errors.candidateEmails}</span>}
             </div>
 
             <div className="form-group">
               <label>End Date</label>
-              <DatePicker
+              <input
+                type="date"
                 selected={endDate}
-                onChange={(date) => setEndDate(date)}
+                onChange={(e) => setEndDate(e.target.value)}
                 placeholderText="Select a Date"
               />
+              {errors.endDate && <span className="error">{errors.endDate}</span>}
             </div>
 
             <button type="submit" className="submit-button">
-              Send
+              {processing ? "Posting..." : "Post"}
             </button>
           </form>
         </div>

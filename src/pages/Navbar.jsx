@@ -28,7 +28,7 @@ const useStyles = makeStyles({
     alignItems: "center",
   },
   logoHighlight: {
-    color: "#0096FF", // Customize this to match the blue color of the logo
+    color: "#0096FF",
   },
   toolbar: {
     justifyContent: "space-between",
@@ -52,10 +52,10 @@ const NavBar = () => {
   const classes = useStyles();
   const [anchorEl, setAnchorEl] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [companyData, setCompanyData] = useState(null); // For storing company data
+  const [companyData, setCompanyData] = useState(null);
 
   const navigate = useNavigate();
-  const isLoggedIn = !!localStorage.getItem("token"); // Check if token exists
+  const isLoggedIn = !!localStorage.getItem("token");
 
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -66,28 +66,27 @@ const NavBar = () => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("companyEmail"); // Clear the email
-    localStorage.removeItem("token"); // Clear the JWT token
-    localStorage.removeItem("companyData"); // Clear company data
-    window.location.replace("/login"); // Redirect to register or login page
+    localStorage.removeItem("companyEmail");
+    localStorage.removeItem("token");
+    localStorage.removeItem("companyData");
+    window.location.replace("/login");
   };
 
   const handleProfileClick = () => {
-    const data = JSON.parse(localStorage.getItem("companyData")); // Retrieve company data from local storage
-    setCompanyData(data); // Set company data in state
-    setModalOpen(true); // Open the modal
+    const data = JSON.parse(localStorage.getItem("companyData"));
+    setCompanyData(data);
+    setModalOpen(true);
   };
 
   const handleCloseModal = () => {
-    setModalOpen(false); // Close the modal
-    setCompanyData(null); // Clear company data state
+    setModalOpen(false);
+    setCompanyData(null);
   };
 
   return (
     <>
       <AppBarStyled position="fixed" color="transparent" elevation={0}>
         <Toolbar className={classes.toolbar}>
-          {/* Logo */}
           <Box>
             <img
               src={logo}
@@ -96,28 +95,23 @@ const NavBar = () => {
               width="100"
             />
           </Box>
-          {/* Contact and Profile section */}
           <Box display="flex" alignItems="center">
             <Typography variant="body1" className={classes.contact}>
               Contact
             </Typography>
-
-            {/* Profile avatar */}
             {isLoggedIn && (
               <IconButton onClick={handleMenuClick}>
                 <Avatar alt="User Name" />
               </IconButton>
             )}
-
-            {/* Dropdown Menu */}
             <Menu
               anchorEl={anchorEl}
               open={Boolean(anchorEl)}
               onClose={handleMenuClose}
               keepMounted
             >
-               <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
-               <MenuItem onClick={handleLogout}>Logout</MenuItem>
+              <MenuItem onClick={handleProfileClick}>Profile</MenuItem>
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
           </Box>
         </Toolbar>

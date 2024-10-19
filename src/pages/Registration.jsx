@@ -1,13 +1,14 @@
 // src/RegistrationPage.jsx
 import React, { useState } from "react";
-import "../css/Registration.css"; // CSS file for styling
+import "../css/Registration.css";
 import baseURL from "../base_url";
 import axios from "axios";
-import { useNavigate } from "react-router-dom"; // Change this line
+import { useNavigate } from "react-router-dom";
+import LeftSection from "../components/LeftSection";
 
 const RegistrationPage = () => {
   const [processing, setProcessing] = useState(false);
-  const navigate = useNavigate(); // Use useNavigate instead of useHistory
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -26,26 +27,25 @@ const RegistrationPage = () => {
     e.preventDefault();
     const numericFormData = {
       ...formData,
-      phone: Number(formData.phone), // Convert phone to number
-      employeeSize: Number(formData.employeeSize), // Convert employeeSize to number if applicable
+      phone: Number(formData.phone),
+      employeeSize: Number(formData.employeeSize),
     };
 
     try {
-      console.log(numericFormData);
       const response = await axios.post(
         `${baseURL}/api/auth/register`,
         numericFormData
       );
       setProcessing(false);
       if (response.data) {
-        alert(response.data.message); // Show alert with the message from the server
-        localStorage.setItem("formData", JSON.stringify(numericFormData)); // Store company data as JSON string
-        navigate("/verify"); // Redirect to the verification page
+        alert(response.data.message);
+        localStorage.setItem("companyData", JSON.stringify(numericFormData));
+        navigate("/verify");
       }
     } catch (error) {
       setProcessing(false);
       if (error.response) {
-        alert(error.response.data.message); // Show error message from the server
+        alert(error.response.data.message);
       } else {
         alert("An unexpected error occurred.");
       }
@@ -55,12 +55,7 @@ const RegistrationPage = () => {
   return (
     <div className="registration-container">
       <div className="left-section">
-        <h1>Cuvette</h1>
-        <p>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley.
-        </p>
+        <LeftSection />
       </div>
       <div className="right-section">
         <form className="registration-form" onSubmit={handleSubmit}>
@@ -121,7 +116,7 @@ const RegistrationPage = () => {
 
           <p className="login-link">
             Already have an account?{" "}
-            <a href="/login" onClick={(e) => {e.preventDefault(); navigate('/login')}}>
+            <a href="/login" onClick={(e) => { e.preventDefault(); navigate('/login'); }}>
               Login
             </a>
           </p>

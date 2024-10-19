@@ -1,14 +1,14 @@
-// src/LoginPage.jsx
 import React, { useState } from "react";
 import axios from "axios";
-import "../css/Registration.css"; // CSS for styling
-import { useNavigate } from "react-router-dom"; // For navigation
+import "../css/Registration.css";
+import { useNavigate } from "react-router-dom";
 import baseURL from "../base_url";
+import LeftSection from "../components/LeftSection";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState("");
-  const [step, setStep] = useState(1); // Track the current step
+  const [step, setStep] = useState(1);
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
 
@@ -20,8 +20,8 @@ const LoginPage = () => {
       const response = await axios.post(`${baseURL}/api/auth/send-login-otp`, {
         companyEmail: email,
       });
-      alert(response.data.message); // Show success message
-      setStep(2); // Move to the next step to enter OTP
+      alert(response.data.message);
+      setStep(2);
     } catch (error) {
       alert(
         error.response
@@ -36,25 +36,26 @@ const LoginPage = () => {
   const handleOtpVerify = async (e) => {
     e.preventDefault();
     setProcessing(true);
+    if (!otp) {
+      alert("Enter Valid Otp");
+      setProcessing(false);
+      return;
+    }
     try {
       const response = await axios.post(
         `${baseURL}/api/auth/verify-login-otp`,
         { companyEmail: email, otp }
       );
 
-      alert(response.data.message); // Show success message
-      localStorage.setItem("token", response.data.token); // Save token to local storage
+      alert(response.data.message);
+      localStorage.setItem("token", response.data.token);
       localStorage.setItem(
         "companyData",
         JSON.stringify(response.data.companyData)
-      ); // Save company data to local storage
-      window.location.replace("/"); // Redirect to the homepage or dashboard
-    } catch (error) {
-      alert(
-        error.response
-          ? error.response.data.message
-          : "An unexpected error occurred."
       );
+      window.location.replace("/"); 
+    } catch (error) {
+      alert("Invalid OTP");
     } finally {
       setProcessing(false);
     }
@@ -63,12 +64,7 @@ const LoginPage = () => {
   return (
     <div className="registration-container">
       <div className="left-section">
-        <h1>Cuvette</h1>
-        <p>
-          Lorem Ipsum is simply dummy text of the printing and typesetting
-          industry. Lorem Ipsum has been the industry's standard dummy text ever
-          since the 1500s, when an unknown printer took a galley.
-        </p>
+        <LeftSection />
       </div>
       <div className="right-section">
         <form className="registration-form">
