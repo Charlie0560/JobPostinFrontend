@@ -7,22 +7,21 @@ import baseURL from "../base_url";
 const VerifyPage = () => {
   const [emailOtp, setEmailOtp] = useState('');
   const [processing, setProcessing] = useState(false);
-  const [formData, setFormData] = useState(JSON.parse(localStorage.getItem("formData")));
+  const [formData, setFormData] = useState(JSON.parse(localStorage.getItem("companyData")));
   const navigate = useNavigate();
 
   const handleEmailVerify = async () => {
     setProcessing(true);
+    const data = {
+      companyEmail: formData.companyEmail,
+      otp: Number(emailOtp),
+      name: formData.name,
+      phone: formData.phone,
+      companyName: formData.companyName,
+      employeeSize: formData.employeeSize
+    }
     try {
-      const response = await axios.post(`${baseURL}/api/auth/verify-otp-and-save`, {
-        companyEmail: formData.companyEmail,
-        otp: emailOtp,
-        name: formData.name,
-        phone: formData.phone,
-        companyName: formData.companyName,
-        employeeSize: formData.employeeSize,
-        password: formData.password,
-      });
-
+      const response = await axios.post(`${baseURL}/api/auth/verify-otp-and-save`,data);
       if (response.data.token) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("companyData", JSON.stringify(formData));
@@ -33,6 +32,7 @@ const VerifyPage = () => {
       navigate('/');
     } catch (error) {
       setProcessing(false);
+      console.log(error)
       if (error.response) {
         alert(error.response.data.message);
       } else {
@@ -58,7 +58,7 @@ const VerifyPage = () => {
 
           <div className="input-group">
             <input
-              type="text"
+              type="number"
               placeholder="Email OTP"
               value={emailOtp}
               onChange={(e) => setEmailOtp(e.target.value)}
