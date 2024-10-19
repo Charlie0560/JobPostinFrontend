@@ -90,3 +90,21 @@ body {
   color: #4a90e2;
   text-decoration: none;
 }
+
+@media (max-width: 768px) {
+  .registration-form{
+    width: 70%;
+    margin-right: 20px;
+    margin-top: 15%;
+  }
+}
+
+@media (max-width: 600px) {
+  .left-section{
+    display: none !important;
+  }
+  .registration-form{
+    width: 100%;
+    margin-right: 0;
+  }
+}

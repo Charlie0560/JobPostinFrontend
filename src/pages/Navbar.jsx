@@ -31,7 +31,7 @@ const useStyles = makeStyles({
     color: "#0096FF",
   },
   toolbar: {
-    justifyContent: "space-between",
+    justifyContent: "space-between"
   },
   contact: {
     marginRight: "20px",

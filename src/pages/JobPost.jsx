@@ -163,6 +163,7 @@ const JobPostingPage = () => {
                 value={experienceLevel}
                 onChange={setExperienceLevel}
                 placeholder="Select Experience Level"
+                className="select"
               />
             </div>
 

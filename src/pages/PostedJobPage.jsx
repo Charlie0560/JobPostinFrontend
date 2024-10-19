@@ -12,28 +12,32 @@ import {
   Button,
   Modal,
   Paper,
+  useMediaQuery,
+  Card,
+  CardContent,
+  CardActions,
 } from "@mui/material";
 import axios from "axios";
 import baseURL from "../base_url";
+import { useTheme } from "@mui/material/styles";
 
 const JobPostedPage = () => {
   const [jobPosts, setJobPosts] = useState([]);
   const [open, setOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Check if screen size is mobile
 
   useEffect(() => {
     const fetchJobPosts = async () => {
       const token = localStorage.getItem("token");
 
       try {
-        const response = await axios.get(
-          `${baseURL}/api/jobs/getjobs`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const response = await axios.get(`${baseURL}/api/jobs/getjobs`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const jobsWithStatus = response.data.jobs.map((job) => ({
           ...job,
           status: new Date(job.endDate) > new Date() ? "Active" : "Inactive",
@@ -61,48 +65,78 @@ const JobPostedPage = () => {
   return (
     <Box sx={{ p: 3 }}>
       <Typography variant="h4" gutterBottom>
-        Job Postings
+        Posted Jobs
       </Typography>
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>
-                <TableSortLabel>Title</TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel>Description</TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel>Experience Level</TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel>End Date</TableSortLabel>
-              </TableCell>
-              <TableCell>
-                <TableSortLabel>Status</TableSortLabel>
-              </TableCell>
-              <TableCell align="right">Action</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {jobPosts.map((job) => (
-              <TableRow key={job._id}>
-                <TableCell>{job.title}</TableCell>
-                <TableCell>{job.description}</TableCell>
-                <TableCell>{job.experienceLevel}</TableCell>
-                <TableCell>{new Date(job.endDate).toLocaleDateString()}</TableCell>
-                <TableCell>{job.status}</TableCell>
-                <TableCell align="right">
-                  <Button variant="contained" onClick={() => handleOpen(job)}>
-                    View Details
-                  </Button>
+
+      {isMobile ? (
+        // Mobile View: Render Jobs as Cards
+        jobPosts.map((job) => (
+          <Card key={job._id} sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography variant="h6">{job.title}</Typography>
+              <Typography variant="body2" color="textSecondary">
+                {job.description}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Experience Level:</strong> {job.experienceLevel}
+              </Typography>
+              <Typography variant="body2">
+                <strong>End Date:</strong> {new Date(job.endDate).toLocaleDateString()}
+              </Typography>
+              <Typography variant="body2">
+                <strong>Status:</strong> {job.status}
+              </Typography>
+            </CardContent>
+            <CardActions>
+              <Button size="small" variant="contained" onClick={() => handleOpen(job)}>
+                View Details
+              </Button>
+            </CardActions>
+          </Card>
+        ))
+      ) : (
+        // Desktop View: Render Table
+        <TableContainer component={Paper} sx={{ overflowX: "auto" }}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <TableSortLabel>Title</TableSortLabel>
                 </TableCell>
+                <TableCell>
+                  <TableSortLabel>Description</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel>Experience Level</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel>End Date</TableSortLabel>
+                </TableCell>
+                <TableCell>
+                  <TableSortLabel>Status</TableSortLabel>
+                </TableCell>
+                <TableCell align="right">Action</TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            </TableHead>
+            <TableBody>
+              {jobPosts.map((job) => (
+                <TableRow key={job._id}>
+                  <TableCell>{job.title}</TableCell>
+                  <TableCell>{job.description}</TableCell>
+                  <TableCell>{job.experienceLevel}</TableCell>
+                  <TableCell>{new Date(job.endDate).toLocaleDateString()}</TableCell>
+                  <TableCell>{job.status}</TableCell>
+                  <TableCell align="right">
+                    <Button variant="contained" onClick={() => handleOpen(job)}>
+                      View Details
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
 
       <Modal open={open} onClose={handleClose}>
         <Box
