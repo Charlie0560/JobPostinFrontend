@@ -198,7 +198,7 @@ const EmailLogPage = () => {
             width: 400,
             bgcolor: "background.paper",
             boxShadow: 24,
-            p: 4,
+            p: 3,
             borderRadius: 2,
           }}
         >
@@ -241,6 +241,7 @@ const EmailLogPage = () => {
             bgcolor: "background.paper",
             boxShadow: 24,
             borderRadius: 2,
+            padding: 3
           }}
         >
           <Typography variant="h6">Job Details</Typography>

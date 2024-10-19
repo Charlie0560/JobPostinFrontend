@@ -17,7 +17,6 @@ import { makeStyles } from "@mui/styles";
 import MuiAppBar from "@mui/material/AppBar";
 import { styled } from "@mui/material/styles";
 import logo from "../images/logo.png";
-import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles({
   logoText: {
@@ -54,7 +53,6 @@ const NavBar = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [companyData, setCompanyData] = useState(null);
 
-  const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem("token");
 
   const handleMenuClick = (event) => {
